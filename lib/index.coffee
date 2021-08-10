@@ -142,12 +142,12 @@ class EPub
           id = image.id
           extension = image.extension
         else
-          id = uuid()
+          id = path.basename url
           mediaType = mime.getType url.replace /\?.*/, ""
           extension = mime.getExtension mediaType
           dir = content.dir
           self.options.images.push {id, url, dir, mediaType, extension}
-        $(elem).attr("src", "images/#{id}.#{extension}")
+        $(elem).attr("src", "images/#{id}")
       content.data = $.xml()
       content
 
@@ -290,7 +290,7 @@ class EPub
     if not options.url and typeof options isnt "string"
       return false
     downloadImageDefer = new Q.defer()
-    filename = path.resolve self.uuid, ("./OEBPS/images/" + options.id + "." + options.extension)
+    filename = path.resolve self.uuid, ("./OEBPS/images/" + options.id)
     if options.url.indexOf("file://") == 0
       auxpath = options.url.substr(7)
       fsextra.copySync(auxpath, filename)
