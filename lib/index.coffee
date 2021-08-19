@@ -55,6 +55,8 @@ class EPub
       version: 3
     }, options
 
+  generate: ()->
+    self = @
     if @options.version is 2
       @options.docHeader = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
@@ -156,29 +158,20 @@ class EPub
       @options._coverExtension = mime.getExtension @options._coverMediaType
 
     @render()
-    @promise = @defer.promise
 
   render: ()->
     self = @
     if self.options.verbose then console.log("Generating Template Files.....")
-    @generateTempFile().then ()->
-      if self.options.verbose then console.log("Downloading Images...")
-      self.downloadAllImage().fin ()->
-        if self.options.verbose then console.log("Making Cover...")
-        self.makeCover().then ()->
-          if self.options.verbose then console.log("Generating Epub Files...")
-          self.genEpub().then (result)->
-            if self.options.verbose then console.log("About to finish...")
-            self.defer.resolve(result)
-            if self.options.verbose then console.log("Done.")
-          , (err)->
-            self.defer.reject(err)
-        , (err)->
-          self.defer.reject(err)
-      , (err)->
-        self.defer.reject(err)
-    , (err)->
-      self.defer.reject(err)
+    await @generateTempFile()
+    if self.options.verbose then console.log("Downloading Images...")
+    await self.downloadAllImage()
+    if self.options.verbose then console.log("Making Cover...")
+    await self.makeCover()
+    if self.options.verbose then console.log("Generating Epub Files...")
+    result = await self.genEpub()
+    if self.options.verbose then console.log("About to finish...")
+    if self.options.verbose then console.log("Done.")
+    result
 
   generateTempFile: ()->
     generateDefer = new Q.defer()
