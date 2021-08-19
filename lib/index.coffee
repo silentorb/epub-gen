@@ -53,6 +53,7 @@ class EPub
       customNcxTocTemplatePath: null
       customHtmlTocTemplatePath: null
       version: 3
+      metadata: []
     }, options
 
   generate: ()->

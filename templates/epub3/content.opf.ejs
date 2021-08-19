@@ -7,10 +7,8 @@
          xml:lang="en"
          xmlns:media="http://www.idpf.org/epub/vocab/overlays/#"
          prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/">
-
     <metadata xmlns:dc="http://purl.org/dc/elements/1.1/"
               xmlns:opf="http://www.idpf.org/2007/opf">
-
         <dc:identifier id="BookId"><%= id %></dc:identifier>
         <meta refines="#BookId" property="identifier-type" scheme="onix:codelist5">22</meta>
         <meta property="dcterms:identifier" id="meta-identifier">BookId</meta>
@@ -23,7 +21,7 @@
         <meta refines="#creator" property="file-as"><%= author.length ? author.join(",") : author %></meta>
         <meta property="dcterms:publisher"><%= publisher || "anonymous" %></meta>
         <dc:publisher><%= publisher || "anonymous" %></dc:publisher>
-        <% var date = new Date(); var year = date.getFullYear(); var month = date.getMonth() + 1; var day = date.getDate(); var stringDate = "" + year + "-" + month + "-" + day; %>
+        <%_ var date = new Date(); var year = date.getFullYear(); var month = date.getMonth() + 1; var day = date.getDate(); var stringDate = "" + year + "-" + month + "-" + day; _%>
         <meta property="dcterms:date"><%= stringDate %></meta>
         <dc:date><%= stringDate %></dc:date>
         <meta property="dcterms:rights">All rights reserved</meta>
@@ -31,43 +29,42 @@
         <meta name="cover" content="image_cover"/>
         <meta name="generator" content="epub-gen" />
         <meta property="ibooks:specified-fonts">true</meta>
-
+        <%_ metadata.forEach(function(item) { _%>
+        <%_ if (typeof item === 'string') { _%>
+        <%= item %>
+        <%_ } else { _%>
+        <<%= item[0] %>><%= item[1] %></<%= item[0] %>>
+        <%_ } _%>
+        <%_ }); _%>
     </metadata>
-
     <manifest>
         <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
-        <item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
         <item id="css" href="style.css" media-type="text/css" />
-
-        <% if(locals.cover) { %>
+        <%_ if(locals.cover) { _%>
         <item id="image_cover" href="cover.<%= _coverExtension %>" media-type="<%= _coverMediaType %>" />
-        <% } %>
-        
-        <% images.forEach(function(image, index){ %>
+        <%_ } _%>
+        <%_ images.forEach(function(image, index){ _%>
         <item id="image_<%= index %>" href="images/<%= image.id %>.<%= image.extension %>" media-type="<%= image.mediaType %>" />
-        <% }) %>
-        
-        <% content.forEach(function(content, index){ %>
+        <%_ }) _%>
+        <%_ content.forEach(function(content, index){ _%>
         <item id="content_<%= index %>_<%= content.id %>" href="<%= content.href %>" media-type="application/xhtml+xml" />
-        <% }) %>
-
-        <% fonts.forEach(function(font, index){%>
+        <%_ }) _%>
+        <%_ fonts.forEach(function(font, index) { _%>
         <item id="font_<%= index%>" href="fonts/<%= font %>" media-type="application/x-font-ttf" />
-        <%})%>
+        <%_ }) _%>
     </manifest>
-
     <spine toc="ncx">
-        <% content.forEach(function(content, index){ %>
-            <% if(content.beforeToc && !content.excludeFromToc){ %>
-                <itemref idref="content_<%= index %>_<%= content.id %>"/>
-            <% } %>
-        <% }) %>
+        <%_ content.forEach(function(content, index){ _%>
+            <%_ if(content.beforeToc && !content.excludeFromToc){ _%>
+                <itemref idref="content_<%= index %>_<%= content.id _%>"/>
+            <%_ } _%>
+        <%_ }) _%>
         <itemref idref="toc" />
-        <% content.forEach(function(content, index){ %>
-            <% if(!content.beforeToc && !content.excludeFromToc){ %>
-                <itemref idref="content_<%= index %>_<%= content.id %>"/>
-            <% } %>
-        <% }) %>
+        <%_ content.forEach(function(content, index){ _%>
+            <%_ if(!content.beforeToc && !content.excludeFromToc){ _%>
+                <itemref idref="content_<%= index %>_<%= content.id _%>"/>
+            <%_ } _%>
+        <%_ }) _%>
     </spine>
     <guide>
         <reference type="text" title="Table of Content" href="toc.xhtml"/>
