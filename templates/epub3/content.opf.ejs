@@ -44,7 +44,7 @@
         <item id="image_cover" href="cover.<%= _coverExtension %>" media-type="<%= _coverMediaType %>" />
         <%_ } _%>
         <%_ images.forEach(function(image, index){ _%>
-        <item id="image_<%= index %>" href="images/<%= image.id %>.<%= image.extension %>" media-type="<%= image.mediaType %>" />
+        <item id="<%= image.id.replace('.', '_') %>" href="images/<%= image.id %>" media-type="<%= image.mediaType %>" />
         <%_ }) _%>
         <%_ content.forEach(function(content, index){ _%>
         <item id="content_<%= index %>_<%= content.id %>" href="<%= content.href %>" media-type="application/xhtml+xml" />
