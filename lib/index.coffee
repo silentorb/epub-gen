@@ -54,6 +54,7 @@ class EPub
       customHtmlTocTemplatePath: null
       version: 3
       metadata: []
+      guide: []
     }, options
 
   generate: ()->
@@ -76,10 +77,11 @@ class EPub
     if not @options.tempDir
       @options.tempDir = path.resolve __dirname, "../tempDir/"
     @id = uuid()
-    @uuid = path.resolve @options.tempDir, @id
+    @uuid = path.resolve @options.tempDir, (if process.env.PRESERVE_TEMP_DIR then 'default' else @id)
     @options.uuid = @uuid
     @options.id = @id
     @options.images = []
+
     @options.content = _.map @options.content, (content, index)->
 
       if !content.filename
@@ -154,10 +156,6 @@ class EPub
       content.data = $.xml()
       content
 
-    if @options.cover
-      @options._coverMediaType = mime.getType @options.cover
-      @options._coverExtension = mime.getExtension @options._coverMediaType
-
     @render()
 
   render: ()->
@@ -166,8 +164,6 @@ class EPub
     await @generateTempFile()
     if self.options.verbose then console.log("Downloading Images...")
     await self.downloadAllImage()
-    if self.options.verbose then console.log("Making Cover...")
-    await self.makeCover()
     if self.options.verbose then console.log("Generating Epub Files...")
     result = await self.genEpub()
     if self.options.verbose then console.log("About to finish...")
@@ -179,6 +175,10 @@ class EPub
     self = @
     if !fs.existsSync(@options.tempDir)
       fs.mkdirSync(@options.tempDir)
+
+    if process.env.PRESERVE_TEMP_DIR and fs.existsSync(@options.tempDir)
+      rimraf.sync @uuid
+
     fs.mkdirSync @uuid
     fs.mkdirSync path.resolve(@uuid, "./OEBPS")
     @options.css ||= fs.readFileSync(path.resolve(__dirname, "../templates/template.css"))
@@ -252,32 +252,6 @@ class EPub
 
     generateDefer.promise
 
-  makeCover: ()->
-    self = @
-    userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36"
-    coverDefer = new Q.defer()
-    if @options.cover
-      destPath = path.resolve @uuid, ("./OEBPS/cover." + @options._coverExtension)
-      writeStream = null
-      if @options.cover.slice(0,4) is "http"
-        writeStream = request.get(@options.cover).set 'User-Agent': userAgent
-        writeStream.pipe(fs.createWriteStream(destPath))
-      else
-        writeStream = fs.createReadStream(@options.cover)
-        writeStream.pipe(fs.createWriteStream(destPath))
-
-      writeStream.on "end", ()->
-        if self.options.verbose then console.log "[Success] cover image downloaded successfully!"
-        coverDefer.resolve()
-      writeStream.on "error", (err)->
-        console.error "Error", err
-        coverDefer.reject(err)
-    else
-      coverDefer.resolve()
-
-    coverDefer.promise
-
-
   downloadImage: (options)->  #{id, url, mediaType}
     self = @
     userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36"
@@ -344,12 +318,13 @@ class EPub
     archive.directory cwd + "/OEBPS", "OEBPS"
     archive.pipe output
     archive.on "end", ()->
-      if self.options.verbose then console.log "Done zipping, clearing temp dir..."
-      rimraf cwd, (err)->
-        if err
-          genDefer.reject(err)
-        else
-          genDefer.resolve()
+      if !process.env.PRESERVE_TEMP_DIR
+        if self.options.verbose then console.log "Done zipping, clearing temp dir..."
+        rimraf cwd, (err)->
+          if err
+            genDefer.reject(err)
+          else
+            genDefer.resolve()
     archive.on "error", (err) -> genDefer.reject(err)
     archive.finalize()
 

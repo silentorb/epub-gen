@@ -14,34 +14,26 @@
         <text><%= author %></text>
     </docAuthor>
     <navMap>
-        <% var _index = 0; %>
-        <% content.forEach(function(content, index){ %>
-            <% if(!content.excludeFromToc && content.beforeToc){ %>
+        <%_ var _index = 0; _%>
+        <%_ content.forEach(function(content, index){ _%>
+            <%_ if(!content.excludeFromToc && content.beforeToc){ _%>
                 <navPoint id="content_<%= index %>_<%= content.id %>" playOrder="<%= _index++ %>" class="chapter">
                     <navLabel>
                         <text><%= (1+index) + ". " + (content.title || "Chapter " + (1+index))%></text>
                     </navLabel>
                     <content src="<%= content.href %>"/>
                 </navPoint>
-            <% } %>
-        <% }) %>
-
-        <navPoint id="toc" playOrder="<%= _index++ %>" class="chapter">
-            <navLabel>
-                <text><%= tocTitle %></text>
-            </navLabel>
-            <content src="toc.xhtml"/>
+            <%_ } _%>
+        <%_ }) _%>
+        <%_ content.forEach(function(content, index){ _%>
+        <%_ if(!content.excludeFromToc && !content.beforeToc){ _%>
+        <navPoint id="content_<%= index %>_<%= content.id %>" playOrder="<%= _index++ %>" class="chapter">
+        <navLabel>
+        <text><%= (1+index) + ". " + (content.title || "Chapter " + (1+index))%></text>
+        </navLabel>
+        <content src="<%= content.href %>"/>
         </navPoint>
-
-        <% content.forEach(function(content, index){ %>
-            <% if(!content.excludeFromToc && !content.beforeToc){ %>
-                <navPoint id="content_<%= index %>_<%= content.id %>" playOrder="<%= _index++ %>" class="chapter">
-                    <navLabel>
-                        <text><%= (1+index) + ". " + (content.title || "Chapter " + (1+index))%></text>
-                    </navLabel>
-                    <content src="<%= content.href %>"/>
-                </navPoint>
-            <% } %>
-        <% }) %>
+        <%_ } _%>
+        <%_ }) _%>
     </navMap>
 </ncx>

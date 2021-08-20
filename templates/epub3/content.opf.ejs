@@ -26,7 +26,7 @@
         <dc:date><%= stringDate %></dc:date>
         <meta property="dcterms:rights">All rights reserved</meta>
         <dc:rights>Copyright &#x00A9; <%= (new Date()).getFullYear() %> by <%= publisher || "anonymous" %></dc:rights>
-        <meta name="cover" content="image_cover"/>
+        <meta name="cover" content="cover_jpg"/>
         <meta name="generator" content="epub-gen" />
         <meta property="ibooks:specified-fonts">true</meta>
         <%_ metadata.forEach(function(item) { _%>
@@ -40,9 +40,6 @@
     <manifest>
         <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
         <item id="css" href="style.css" media-type="text/css" />
-        <%_ if(locals.cover) { _%>
-        <item id="image_cover" href="cover.<%= _coverExtension %>" media-type="<%= _coverMediaType %>" />
-        <%_ } _%>
         <%_ images.forEach(function(image, index){ _%>
         <item id="<%= image.id.replace('.', '_') %>" href="images/<%= image.id %>" media-type="<%= image.mediaType %>" />
         <%_ }) _%>
@@ -56,17 +53,18 @@
     <spine toc="ncx">
         <%_ content.forEach(function(content, index){ _%>
             <%_ if(content.beforeToc && !content.excludeFromToc){ _%>
-                <itemref idref="content_<%= index %>_<%= content.id _%>"/>
+        <itemref idref="content_<%= index %>_<%= content.id _%>"/>
             <%_ } _%>
         <%_ }) _%>
-        <itemref idref="toc" />
         <%_ content.forEach(function(content, index){ _%>
             <%_ if(!content.beforeToc && !content.excludeFromToc){ _%>
-                <itemref idref="content_<%= index %>_<%= content.id _%>"/>
+        <itemref idref="content_<%= index %>_<%= content.id _%>"/>
             <%_ } _%>
         <%_ }) _%>
     </spine>
     <guide>
-        <reference type="text" title="Table of Content" href="toc.xhtml"/>
+        <%_ guide.forEach(function(reference) { _%>
+        <reference type="<%= reference.type %>" title="<%= reference.title %>" href="<%= reference.href %>"/>
+        <%_ }); _%>
     </guide>
 </package>
