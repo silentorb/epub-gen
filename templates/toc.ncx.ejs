@@ -16,22 +16,12 @@
     <navMap>
         <%_ var _index = 0; _%>
         <%_ content.forEach(function(content, index){ _%>
-            <%_ if(!content.excludeFromToc && content.beforeToc){ _%>
-                <navPoint id="content_<%= index %>_<%= content.id %>" playOrder="<%= _index++ %>" class="chapter">
-                    <navLabel>
-                        <text><%= (1+index) + ". " + (content.title || "Chapter " + (1+index))%></text>
-                    </navLabel>
-                    <content src="<%= content.href %>"/>
-                </navPoint>
-            <%_ } _%>
-        <%_ }) _%>
-        <%_ content.forEach(function(content, index){ _%>
-        <%_ if(!content.excludeFromToc && !content.beforeToc){ _%>
+        <%_ if(!content.excludeFromToc){ _%>
         <navPoint id="content_<%= index %>_<%= content.id %>" playOrder="<%= _index++ %>" class="chapter">
-        <navLabel>
-        <text><%= (1+index) + ". " + (content.title || "Chapter " + (1+index))%></text>
-        </navLabel>
-        <content src="<%= content.href %>"/>
+            <navLabel>
+                <text><%= content.title%></text>
+            </navLabel>
+            <content src="<%= content.href %>"/>
         </navPoint>
         <%_ } _%>
         <%_ }) _%>
